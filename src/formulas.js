@@ -6,6 +6,7 @@
 let formulas = {
     'FLOOR': Math.floor,
     '_xlfn.FLOOR.MATH': Math.floor,
+    'FLOOR.MATH': Math.floor,
     'ABS': Math.abs,
     'SQRT': Math.sqrt,
     'VLOOKUP': vlookup,
@@ -48,6 +49,7 @@ let formulas = {
     'SUMIF': sumif, // missing test,
     'CHOOSE': choose,
     'SUBSTITUTE': substitute,
+    'CEILING': ceiling,
 };
 
 function choose(option) {
@@ -60,8 +62,10 @@ function sumif(){
     let sumResult = 0;
 
     [].slice.call(arguments)[0][0].forEach((elt,key) =>{
-
+        
         if (elt!==null){
+            //if the element is not a string but a number, number has no replace function, so converting to string.
+            elt = elt.toString();
             if( elt.replace(/\'/g, "") === elementToSum){
                 if (!isNaN([].slice.call(arguments)[2][0][key])){
                     sumResult += [].slice.call(arguments)[2][0][key]
@@ -268,19 +272,40 @@ function match_exactly_non_string(matrix, lookupValue) {
     throw Error('#N/A');
 }
 
+// +---------------------+
+// | THE IMPLEMENTATIONS |
+// +---------------------+
+
+
 function match_greater_than_or_equal(matrix, lookupValue) {
     var index;
     var indexValue;
     for (var idx = 0; idx < matrix.length; idx++) {
-        if (matrix[idx] === lookupValue) {
-            return idx + 1;
-        } else if (matrix[idx] > lookupValue) {
-            if (!indexValue) {
-                index = idx + 1;
-                indexValue = matrix[idx];
-            } else if (matrix[idx] < indexValue) {
-                index = idx + 1;
-                indexValue = matrix[idx];
+        if (Array.isArray(matrix[idx]) && matrix[idx].length > 0) {
+            // For array in column
+            if (matrix[idx][0] === lookupValue) {
+                return idx + 1;
+            } else if (matrix[idx][0] > lookupValue) {
+                if (!indexValue) {
+                    index = idx + 1;
+                    indexValue = matrix[idx][0];
+                } else if (matrix[idx][0] < indexValue) {
+                    index = idx + 1;
+                    indexValue = matrix[idx][0];
+                }
+            }
+        } else {
+            // For array in row
+            if (matrix[idx] === lookupValue) {
+                return idx + 1;
+            } else if (matrix[idx] > lookupValue) {
+                if (!indexValue) {
+                    index = idx + 1;
+                    indexValue = matrix[idx];
+                } else if (matrix[idx] < indexValue) {
+                    index = idx + 1;
+                    indexValue = matrix[idx];
+                }
             }
         }
     }
@@ -372,7 +397,7 @@ function trim(a) {
 }
 
 function is_blank(a) {
-    console.log(a)
+    // console.log(a)
     return !a;
 }
 
@@ -731,11 +756,18 @@ function min() {
     return min;
 }
 
-function vlookup(key, matrix, return_index) {
+function vlookup(key, matrix, return_index, range_lookup=true) {
+    var val = null;
     for (var i = 0; i < matrix.length; i++) {
-        if (matrix[i][0] == key) {
+        if (matrix[i][0] < key) {
+            val = matrix[i][return_index - 1];
+        }
+        else if (matrix[i][0] == key) {
             return matrix[i][return_index - 1];
         }
+    }
+    if (range_lookup && val) {
+        return val;
     }
     throw Error('#N/A');
 }
@@ -823,14 +855,18 @@ function ifs(/*_cond1, _val1, _cond2, _val2, _cond3, _val3, ... */) {
     throw Error('#N/A');
 }
 
+function escapeRegExp(str) {
+    return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+}
+
 function substitute(text, old_text, new_text, occurrence) {
-    if(occurrence === 0) {
+    if(occurrence <= 0) {
       throw Error('#VALUE!');
-    }  
+    }
     if (!text || !old_text || (!new_text && new_text !== '')) {
       return text;
     } else if (occurrence === undefined) {
-      return text.replace(new RegExp(old_text, 'g'), new_text);
+      return text.replace(new RegExp(escapeRegExp(old_text), 'g'), new_text);
     } else {
       var index = 0;
       var i = 0;
@@ -843,5 +879,9 @@ function substitute(text, old_text, new_text, occurrence) {
       }
     }
   };
+
+function ceiling(number, significance) {
+    return Math.ceil(number / significance) * significance
+}
 
 module.exports = formulas;

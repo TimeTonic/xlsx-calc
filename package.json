@@ -1,6 +1,6 @@
 {
   "name": "xlsx-calc",
-  "version": "0.6.4",
+  "version": "0.7.0",
   "description": "A simple xlsx formula calculator.",
   "main": "src/index.js",
   "repository": "git@github.com:fabiooshiro/xlsx-calc.git",
@@ -12,16 +12,15 @@
     "test-w": "mocha -w --check-leaks --sort",
     "build": "webpack --mode=production && sh deprecated-clones.sh"
   },
-  "dependencies": {
-    "formulajs": "^1.0.8",
-    "xlsx": "^0.8.8"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "mocha": "^5.2.0",
-    "nyc": "^14.1.1",
+    "@formulajs/formulajs": "^2.6.3",
+    "mocha": "^8.3.0",
+    "nyc": "^15.1.0",
     "pre-commit": "^1.2.2",
-    "webpack": "^4.41.0",
-    "webpack-cli": "^3.3.9"
+    "webpack": "^4.46.0",
+    "webpack-cli": "^3.3.12",
+    "xlsx": "^0.17.0"
   },
   "tonicExampleFilename": "example_tonic.js",
   "pre-commit": [

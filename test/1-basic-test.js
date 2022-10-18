@@ -693,30 +693,41 @@ describe('XLSX_CALC', function() {
             assert.equal(workbook.Sheets.Sheet1.A1.w, '#VALUE!');
             assert.equal(workbook.Sheets.Sheet1.A1.v, errorValues['#VALUE!']);
         });
+        it('should throw #VALUE if occurence value is negative', function() {
+            workbook.Sheets.Sheet1.A1 = { f: 'SUBSTITUTE("a","b","c",-5)' };
+            XLSX_CALC(workbook);
+            assert.equal(workbook.Sheets.Sheet1.A1.w, '#VALUE!');
+            assert.equal(workbook.Sheets.Sheet1.A1.v, errorValues['#VALUE!']);
+        });
         it('should transform Jim to James', function() {
             workbook.Sheets.Sheet1.A1 = { f: 'SUBSTITUTE("Jim Alateras","im","ames")' };
             XLSX_CALC(workbook);
-            assert.equal(workbook.Sheets.Sheet1.A1.v, 'James Alateras');            
+            assert.equal(workbook.Sheets.Sheet1.A1.v, 'James Alateras');
         });
         it('should transform nothing', function() {
             workbook.Sheets.Sheet1.A1 = { f: 'SUBSTITUTE("Jim Alateras","","ames")' };
             XLSX_CALC(workbook);
-            assert.equal(workbook.Sheets.Sheet1.A1.v, 'Jim Alateras');            
+            assert.equal(workbook.Sheets.Sheet1.A1.v, 'Jim Alateras');
         });
         it('should equals empty string', function() {
             workbook.Sheets.Sheet1.A1 = { f: 'SUBSTITUTE("","im","ames")' };
             XLSX_CALC(workbook);
-            assert.equal(workbook.Sheets.Sheet1.A1.v, '');            
+            assert.equal(workbook.Sheets.Sheet1.A1.v, '');
         });
         it('should equal Quarter 2, 2008', function() {
             workbook.Sheets.Sheet1.A1 = { f: 'SUBSTITUTE("Quarter 1, 2008","1","2", 1)' };
             XLSX_CALC(workbook);
-            assert.equal(workbook.Sheets.Sheet1.A1.v, 'Quarter 2, 2008');            
+            assert.equal(workbook.Sheets.Sheet1.A1.v, 'Quarter 2, 2008');
         });
         it('should equal 07792 526879', function() {
             workbook.Sheets.Sheet1.A1 = { f: 'SUBSTITUTE("t:07792 526879","t:","")' };
             XLSX_CALC(workbook);
-            assert.equal(workbook.Sheets.Sheet1.A1.v, '07792 526879');            
+            assert.equal(workbook.Sheets.Sheet1.A1.v, '07792 526879');
+        });
+        it('should handle especial chars like dot', function() {
+            workbook.Sheets.Sheet1.A1 = { f: 'SUBSTITUTE("my text","...","")' };
+            XLSX_CALC(workbook);
+            assert.equal(workbook.Sheets.Sheet1.A1.v, 'my text');
         });
     });
     describe('DAY', function () {
@@ -880,6 +891,11 @@ describe('XLSX_CALC', function() {
         workbook.Sheets.Sheet1.A2.v = 1979;
         XLSX_CALC(workbook);
         assert.equal(workbook.Sheets.Sheet1.A1.v, 1979);
+    });
+    it('calcs form with space after parentheses', function() {
+        workbook.Sheets.Sheet1.A1.f = '(1) * 2';
+        XLSX_CALC(workbook);
+        assert.equal(workbook.Sheets.Sheet1.A1.v, 2);
     });
     it('calcs ref with $', function() {
         workbook.Sheets.Sheet1.A1.f = '$A$2 ';
@@ -1283,6 +1299,73 @@ describe('XLSX_CALC', function() {
         });
     });
 
+    describe('VLOOKUP', function() {
+        it('exact match', function() {
+            workbook.Sheets.Sheet1 = {
+                A1: { v: 'A' },
+                A2: { v: 'B' },
+                A3: { v: 'C' },
+                A4: { v: 'D' },
+                A5: { v: 'E' },
+                B1: { v: 1996 },
+                B2: { v: 1997 },
+                B3: { v: 1999 },
+                B4: { v: 1995 },
+                B5: { v: 1992 },
+                C1: { v: 5 },
+                C2: { v: 4 },
+                C3: { v: 1 },
+                C4: { v: 2 },
+                C5: { v: 3 },
+                D1: { v: 'D' },
+                D2: { f: 'VLOOKUP("D", A1:C5, 2, FALSE)' },
+            }
+            XLSX_CALC(workbook)
+            assert.equal(workbook.Sheets.Sheet1.D2.v, 1995)
+        })
+        it('approximate match', function() {
+            workbook.Sheets.Sheet1 = {
+                A1: { v: 171900 },
+                A2: { v: 93500 },
+                A3: { v: 151200 },
+                A4: { v: 119850 },
+                A5: { v: 89450 },
+                A6: { v: 124500 },
+                A7: { v: 131100 },
+                A8: { v: 201500 },
+                B1: { f: 'VLOOKUP(A1, C1:D6, 2, TRUE)' },
+                B2: { f: 'VLOOKUP(A2, C1:D6, 2, TRUE)' },
+                B3: { f: 'VLOOKUP(A3, C1:D6, 2, TRUE)' },
+                B4: { f: 'VLOOKUP(A4, C1:D6, 2, TRUE)' },
+                B5: { f: 'VLOOKUP(A5, C1:D6, 2, TRUE)' },
+                B6: { f: 'VLOOKUP(A6, C1:D6, 2, TRUE)' },
+                B7: { f: 'VLOOKUP(A7, C1:D6, 2, TRUE)' },
+                B8: { f: 'VLOOKUP(A8, C1:D6, 2, TRUE)' },
+                C1: { v: 50000 },
+                C2: { v: 75000 },
+                C3: { v: 100000 },
+                C4: { v: 125000 },
+                C5: { v: 175000 },
+                C6: { v: 200000 },
+                D1: { v: 1 },
+                D2: { v: 2 },
+                D3: { v: 3 },
+                D4: { v: 4 },
+                D5: { v: 5 },
+                D6: { v: 6 },
+            }
+            XLSX_CALC(workbook)
+            assert.equal(workbook.Sheets.Sheet1.B1.v, 4)
+            assert.equal(workbook.Sheets.Sheet1.B2.v, 2)
+            assert.equal(workbook.Sheets.Sheet1.B3.v, 4)
+            assert.equal(workbook.Sheets.Sheet1.B4.v, 3)
+            assert.equal(workbook.Sheets.Sheet1.B5.v, 2)
+            assert.equal(workbook.Sheets.Sheet1.B6.v, 3)
+            assert.equal(workbook.Sheets.Sheet1.B7.v, 4)
+            assert.equal(workbook.Sheets.Sheet1.B8.v, 6)
+        })
+    })
+    
     describe('INDEX', function () {
         it('returns the value of an element in a matrix, selected by the row and column number indexes', function () {
             workbook.Sheets.Sheet1.A1 = { v: 'Data' };
@@ -1298,6 +1381,48 @@ describe('XLSX_CALC', function() {
             XLSX_CALC(workbook);
             assert.equal(workbook.Sheets.Sheet1.C1.v, "Pears");
             assert.equal(workbook.Sheets.Sheet1.C2.v, "Bananas");
+        });
+    });
+
+    describe('MATCH_GREATER_THAN_OR_EQUAL', function () {
+        it('return position of element in range (row or column)', function () {
+            workbook.Sheets.Sheet1.A1 = { v: 100 };
+            workbook.Sheets.Sheet1.A2 = { v: 80 };
+            workbook.Sheets.Sheet1.A3 = { v: 60 };
+            workbook.Sheets.Sheet1.A4 = { v: 0 };
+
+            workbook.Sheets.Sheet1.B1 = { v: 100 };
+            workbook.Sheets.Sheet1.C1 = { v: 80 };
+            workbook.Sheets.Sheet1.D1 = { v: 60 };
+            workbook.Sheets.Sheet1.E1 = { v: 0 };
+
+            workbook.Sheets.Sheet1.B2 = { v: 80 };
+            workbook.Sheets.Sheet1.B3 = { v: 15 };
+            workbook.Sheets.Sheet1.C2 = { v: 75 };
+            workbook.Sheets.Sheet1.C3 = { v: 20 };
+            workbook.Sheets.Sheet1.D2 = { v: 100 };
+            workbook.Sheets.Sheet1.D3 = { v: 12 };
+            workbook.Sheets.Sheet1.B4 = { f: 'MATCH(B2, A1:A4, -1)' };
+            workbook.Sheets.Sheet1.B5 = { f: 'MATCH(B3, B1:F1, -1)' };
+            workbook.Sheets.Sheet1.C4 = { f: 'MATCH(C2, B1:F1, -1)' };
+            workbook.Sheets.Sheet1.C5 = { f: 'MATCH(C3, B1:F1, -1)' };
+            workbook.Sheets.Sheet1.D4 = { f: 'MATCH(D2, B1:F1, -1)' };
+            workbook.Sheets.Sheet1.D5 = { f: 'MATCH(D3, B1:F1, -1)' };
+            workbook.Sheets.Sheet1.C6 = { f: 'MATCH(C2, A1:A4, -1)' };
+            workbook.Sheets.Sheet1.C7 = { f: 'MATCH(C3, A1:A4, -1)' };
+            workbook.Sheets.Sheet1.D6 = { f: 'MATCH(D2, A1:A4, -1)' };
+            workbook.Sheets.Sheet1.D7 = { f: 'MATCH(D3, A1:A4, -1)' };
+            XLSX_CALC(workbook);
+            assert.equal(workbook.Sheets.Sheet1.B4.v, 2);
+            assert.equal(workbook.Sheets.Sheet1.B5.v, 3);
+            assert.equal(workbook.Sheets.Sheet1.C4.v, 2);
+            assert.equal(workbook.Sheets.Sheet1.C5.v, 3);
+            assert.equal(workbook.Sheets.Sheet1.D4.v, 1);
+            assert.equal(workbook.Sheets.Sheet1.D5.v, 3);
+            assert.equal(workbook.Sheets.Sheet1.C6.v, 2);
+            assert.equal(workbook.Sheets.Sheet1.C7.v, 3);
+            assert.equal(workbook.Sheets.Sheet1.D6.v, 1);
+            assert.equal(workbook.Sheets.Sheet1.D7.v, 3);
         });
     });
 
@@ -1514,6 +1639,14 @@ describe('XLSX_CALC', function() {
             };
             XLSX_CALC(workbook);
             assert.equal(workbook.Sheets.Sheet1.A1.v, "b");
+        });
+    });
+
+    describe('CEILING', () => {
+        it('should ceiling to 150', () => {
+            workbook.Sheets.Sheet1.A1.f = 'CEILING(141,10)';
+            XLSX_CALC(workbook);
+            assert.equal(workbook.Sheets.Sheet1.A1.v, 150);
         });
     });
 

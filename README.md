@@ -5,12 +5,14 @@
 (_/\_)\____/(____/(_/\_)   \___)\_/\_/\____/ \___)</pre>
 <div style="clear: both"></div>
 
-![alt text](https://travis-ci.org/fabiooshiro/xlsx-calc.svg?branch=master "Build status")
-
 # Installation
 With [npm](https://www.npmjs.org/package/xlsx-calc):
 ```sh
 npm install xlsx-calc
+```
+OR
+```sh
+yarn add xlsx-calc
 ```
 
 # How to use
@@ -30,13 +32,13 @@ XLSX_CALC(workbook);
 
 ## formulajs integration
 
-`npm install --save formulajs`
+`npm install --save @formulajs/formulajs`
 
 ```js
 var XLSX_CALC = require('xlsx-calc');
 
 // load your calc functions lib
-var formulajs = require('formulajs');
+var formulajs = require('@formulajs/formulajs');
 
 // import your calc functions lib
 XLSX_CALC.import_functions(formulajs);
@@ -141,6 +143,14 @@ Now in terminal:
 Create a pull request
 
 Thx!
+
+# Contributors
+
+<a href="https://github.com/fabiooshiro/xlsx-calc/graphs/contributors">
+  <img src="https://contributors-img.firebaseapp.com/image?repo=fabiooshiro/xlsx-calc" />
+</a>
+
+Made with [contributors-img](https://contributors-img.firebaseapp.com).
 
 # MIT LICENSE
 
