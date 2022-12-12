@@ -1,6 +1,7 @@
 "use strict";
 const utils = require('./utils')
 const error = require('./errors')
+const formulaJSUtils = require('@formulajs/formulajs/lib/utils/common')
 
 // +---------------------+
 // | FORMULAS REGISTERED |
@@ -790,7 +791,17 @@ function time(hours, minutes, seconds) {
     return ((hours * 60 + minutes) * 60 + seconds) * 1000 / MS_PER_DAY;
 }
 
+function parseDate(date) {
+    try {
+        return formulaJSUtils.parseDate(date);
+    }
+    catch(e) {
+        throw Error('#VALUE!');
+    }
+}
+
 function day(date) {
+    date = parseDate(date);
     if (!date.getDate) {
         throw Error('#VALUE!');
     }
@@ -802,6 +813,7 @@ function day(date) {
 }
 
 function month(date) {
+    date = parseDate(date);
     if (!date.getMonth) {
         throw Error('#VALUE!');
     }
@@ -813,6 +825,7 @@ function month(date) {
 }
 
 function year(date) {
+    date = parseDate(date);
     if (!date.getFullYear) {
         throw Error('#VALUE!');
     }

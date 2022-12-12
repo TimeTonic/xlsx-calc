@@ -734,10 +734,21 @@ describe('XLSX_CALC', function() {
         });
     });
     describe('DAY', function () {
-        xit('should return day of date value', function () {
+        it('should return day of date value', function () {
             workbook.Sheets.Sheet1.A1 = {
                 t: 'd',
                 v: new Date('2019-05-29'),
+                w: '2019-05-29'
+            };
+            workbook.Sheets.Sheet1.A2 = { f: 'DAY(A1)' };
+            XLSX_CALC(workbook);
+            assert.equal(workbook.Sheets.Sheet1.A2.v, 29);
+            assert.equal(workbook.Sheets.Sheet1.A2.t, 'n');
+        });
+        it('should return day of text date value', function () {
+            workbook.Sheets.Sheet1.A1 = {
+                t: 'd',
+                v: '2019-05-29',
                 w: '2019-05-29'
             };
             workbook.Sheets.Sheet1.A2 = { f: 'DAY(A1)' };
@@ -766,6 +777,17 @@ describe('XLSX_CALC', function() {
             assert.equal(workbook.Sheets.Sheet1.A2.v, 5);
             assert.equal(workbook.Sheets.Sheet1.A2.t, 'n');
         });
+        it('should return month of text date value', function () {
+            workbook.Sheets.Sheet1.A1 = {
+                t: 'd',
+                v: '2019-05-29',
+                w: '2019-05-29'
+            };
+            workbook.Sheets.Sheet1.A2 = { f: 'MONTH(A1)' };
+            XLSX_CALC(workbook);
+            assert.equal(workbook.Sheets.Sheet1.A2.v, 5);
+            assert.equal(workbook.Sheets.Sheet1.A2.t, 'n');
+        });
         it('should throw #VALUE error if applied to an invalid date', function () {
             workbook.Sheets.Sheet1.A1 = { v: 'AAA' };
             workbook.Sheets.Sheet1.A2 = { f: 'MONTH(A1)' };
@@ -780,6 +802,17 @@ describe('XLSX_CALC', function() {
             workbook.Sheets.Sheet1.A1 = {
                 t: 'd',
                 v: new Date('2019-05-01'),
+                w: '2019-05-01'
+            };
+            workbook.Sheets.Sheet1.A2 = { f: 'YEAR(A1)' };
+            XLSX_CALC(workbook);
+            assert.equal(workbook.Sheets.Sheet1.A2.v, 2019);
+            assert.equal(workbook.Sheets.Sheet1.A2.t, 'n');
+        });
+        it('should return year of text date value', function () {
+            workbook.Sheets.Sheet1.A1 = {
+                t: 'd',
+                v: '2019-05-01',
                 w: '2019-05-01'
             };
             workbook.Sheets.Sheet1.A2 = { f: 'YEAR(A1)' };
